@@ -59,12 +59,12 @@ export default async function HomePage() {
                 </span>
 
                 <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-2 drop-shadow-lg">
-                  {heroItem.anime?.title || 'Solo Leveling'}
+                  {heroItem.anime?.title || 'Anime'}
                 </h1>
 
                 <p className="text-sm md:text-base text-text-secondary font-medium mb-6">
-                  S{heroItem.episode?.season_number || 1} E{heroItem.episode?.episode_number || 3} •{' '}
-                  {heroItem.episode?.title || "It's Like a Game"}
+                  S{heroItem.episode?.season_number ?? 1} E{heroItem.episode?.episode_number ?? 1} •{' '}
+                  {heroItem.episode?.title || 'Episode'}
                 </p>
 
                 {/* Resume Play Button and Progress Bar */}
@@ -85,16 +85,16 @@ export default async function HomePage() {
                         style={{
                           width: `${Math.min(
                             100,
-                            ((heroItem.position_seconds || 754) / (heroItem.duration_seconds || 1420)) * 100
+                            ((heroItem.position_seconds ?? 0) / (heroItem.duration_seconds || 1)) * 100
                           )}%`,
                         }}
                       />
                     </div>
                     <span className="text-xs font-mono text-text-secondary shrink-0">
-                      {Math.floor((heroItem.position_seconds || 754) / 60)}:
-                      {String(Math.floor((heroItem.position_seconds || 754) % 60)).padStart(2, '0')} /{' '}
-                      {Math.floor((heroItem.duration_seconds || 1420) / 60)}:
-                      {String(Math.floor((heroItem.duration_seconds || 1420) % 60)).padStart(2, '0')}
+                      {Math.floor((heroItem.position_seconds ?? 0) / 60)}:
+                      {String(Math.floor((heroItem.position_seconds ?? 0) % 60)).padStart(2, '0')} /{' '}
+                      {Math.floor((heroItem.duration_seconds ?? 0) / 60)}:
+                      {String(Math.floor((heroItem.duration_seconds ?? 0) % 60)).padStart(2, '0')}
                     </span>
                   </div>
                 </div>
@@ -112,17 +112,69 @@ export default async function HomePage() {
               </div>
             </div>
           ) : (
-            <div className="p-8 rounded-3xl glass-card text-center py-12">
-              <h2 className="text-xl font-bold text-white mb-2">Welcome to SANIME</h2>
-              <p className="text-sm text-text-secondary mb-4">You have no in-progress episodes yet.</p>
-              <Link
-                href="/anime"
-                className="purple-glow-btn inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white"
-              >
-                <span>Browse Anime</span>
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
+            /* Fallback to Featured Anime Hero Banner (preserves full visual glory) */
+            animeList[0] && (
+              <div className="relative rounded-3xl overflow-hidden glass-card border border-border/70 group shadow-2xl">
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-[1.02]"
+                  style={{
+                    backgroundImage: `url(${animeList[0].banner_url || '/images/hero-banner.jpg'})`,
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#080910] via-[#080910]/80 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#080910] via-transparent to-black/20" />
+                </div>
+
+                <div className="relative z-10 p-8 md:p-12 min-h-[320px] flex flex-col justify-end">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-3 py-1 rounded-lg bg-accent/20 border border-accent/40 text-xs font-bold text-accent-light uppercase tracking-wider">
+                      Featured Series
+                    </span>
+                    {animeList[0].genre?.slice(0, 2).map((g) => (
+                      <span key={g} className="px-2.5 py-0.5 rounded-md bg-surface-elevated/70 text-[11px] text-text-secondary border border-border/40">
+                        {g}
+                      </span>
+                    ))}
+                  </div>
+
+                  <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-2 drop-shadow-lg">
+                    {animeList[0].title}
+                  </h1>
+
+                  <p className="text-sm md:text-base text-text-secondary font-medium mb-6 max-w-2xl line-clamp-2">
+                    {animeList[0].description}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-4">
+                    <Link
+                      href={`/anime/${animeList[0].id}`}
+                      className="purple-glow-btn inline-flex items-center justify-center gap-2 px-7 py-3 rounded-2xl font-bold text-sm text-white shrink-0"
+                    >
+                      <Play className="w-4 h-4 fill-current" />
+                      <span>Explore Series</span>
+                    </Link>
+
+                    <Link
+                      href="/anime"
+                      className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-surface-elevated/80 border border-border/70 text-sm font-semibold text-white hover:border-accent transition-colors"
+                    >
+                      <span>Full Catalog</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="absolute right-6 top-1/2 -translate-y-1/2 hidden md:block">
+                  <Link
+                    href={`/anime/${animeList[0].id}`}
+                    className="w-11 h-11 rounded-full bg-surface/80 hover:bg-accent border border-border/80 flex items-center justify-center text-white backdrop-blur-md transition-all shadow-lg hover:scale-105"
+                    title="View Series"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Link>
+                </div>
+              </div>
+            )
           )}
 
           {/* Recently Added Section */}
@@ -158,7 +210,7 @@ export default async function HomePage() {
                       {anime.title}
                     </p>
                     <p className="text-[11px] text-text-secondary">
-                      {anime.total_episodes || 12} Episodes
+                      {anime.total_episodes ?? 0} Episodes
                     </p>
                   </div>
                 </Link>
@@ -197,7 +249,7 @@ export default async function HomePage() {
                   <span className="text-sm font-medium text-white">Episodes</span>
                 </div>
                 <span className="text-xs font-semibold text-text-secondary">
-                  {ledger.total_episodes || 245} episodes
+                  {ledger.total_episodes ?? 0} episodes
                 </span>
               </div>
 
@@ -247,8 +299,8 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Continue Watching Sidebar Card (Dan Da Dan in Screenshot) */}
-          {secondContinueItem && (
+          {/* Continue Watching Sidebar Card (or Featured Recommendation) */}
+          {secondContinueItem ? (
             <div className="glass-panel rounded-3xl p-6 border border-border/70 space-y-4">
               <h3 className="text-base font-bold text-white tracking-wide">Continue Watching</h3>
 
@@ -266,11 +318,11 @@ export default async function HomePage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h4 className="text-sm font-bold text-white truncate group-hover:text-accent-light transition-colors">
-                      {secondContinueItem.anime?.title || 'Dan Da Dan'}
+                      {secondContinueItem.anime?.title || 'Anime'}
                     </h4>
                     <p className="text-xs text-text-secondary truncate mt-0.5">
-                      S{secondContinueItem.episode?.season_number || 1} E{secondContinueItem.episode?.episode_number || 5} •{' '}
-                      {secondContinueItem.episode?.title || 'Like, This is Love?!'}
+                      S{secondContinueItem.episode?.season_number ?? 1} E{secondContinueItem.episode?.episode_number ?? 1} •{' '}
+                      {secondContinueItem.episode?.title || 'Episode'}
                     </p>
                   </div>
                 </div>
@@ -282,10 +334,10 @@ export default async function HomePage() {
                     <span>In Progress</span>
                   </span>
                   <span>
-                    {Math.floor((secondContinueItem.position_seconds || 1100) / 60)}:
-                    {String(Math.floor((secondContinueItem.position_seconds || 1100) % 60)).padStart(2, '0')} /{' '}
-                    {Math.floor((secondContinueItem.duration_seconds || 1450) / 60)}:
-                    {String(Math.floor((secondContinueItem.duration_seconds || 1450) % 60)).padStart(2, '0')}
+                    {Math.floor((secondContinueItem.position_seconds ?? 0) / 60)}:
+                    {String(Math.floor((secondContinueItem.position_seconds ?? 0) % 60)).padStart(2, '0')} /{' '}
+                    {Math.floor((secondContinueItem.duration_seconds ?? 0) / 60)}:
+                    {String(Math.floor((secondContinueItem.duration_seconds ?? 0) % 60)).padStart(2, '0')}
                   </span>
                 </div>
 
@@ -295,13 +347,55 @@ export default async function HomePage() {
                     style={{
                       width: `${Math.min(
                         100,
-                        ((secondContinueItem.position_seconds || 1100) / (secondContinueItem.duration_seconds || 1450)) * 100
+                        ((secondContinueItem.position_seconds ?? 0) / (secondContinueItem.duration_seconds || 1)) * 100
                       )}%`,
                     }}
                   />
                 </div>
               </Link>
             </div>
+          ) : (
+            animeList[1] && (
+              <div className="glass-panel rounded-3xl p-6 border border-border/70 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-white tracking-wide">Featured Anime</h3>
+                  <span className="px-2 py-0.5 rounded-md bg-accent/20 border border-accent/40 text-[10px] font-bold text-accent-light uppercase">
+                    Hot
+                  </span>
+                </div>
+
+                <Link
+                  href={`/anime/${animeList[1].id}`}
+                  className="group block p-3 rounded-2xl bg-surface-elevated/40 border border-border/40 hover:border-accent/60 transition-all hover:bg-surface-elevated/60"
+                >
+                  <div className="flex items-center gap-3.5 mb-2">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-border/60">
+                      <img
+                        src={animeList[1].poster_url || '/images/dandadan.jpg'}
+                        alt={animeList[1].title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-bold text-white truncate group-hover:text-accent-light transition-colors">
+                        {animeList[1].title}
+                      </h4>
+                      <p className="text-xs text-text-secondary line-clamp-1 mt-0.5">
+                        {animeList[1].genre?.join(' • ')}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-text-muted line-clamp-2 leading-relaxed mb-3">
+                    {animeList[1].description}
+                  </p>
+
+                  <div className="w-full py-2 rounded-xl bg-accent/20 border border-accent/40 text-xs font-semibold text-accent-light text-center group-hover:bg-accent group-hover:text-white transition-all">
+                    View Series
+                  </div>
+                </Link>
+              </div>
+            )
           )}
         </div>
       </div>

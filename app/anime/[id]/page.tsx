@@ -72,6 +72,20 @@ export default function AnimeDetailPage() {
     } catch {}
   };
 
+  const handleDeleteEpisode = async (episodeId: string, title: string) => {
+    if (!confirm(`Delete episode "${title}"? This will permanently remove its media asset and watch history.`)) return;
+    try {
+      const res = await fetch('/api/files/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ episode_id: episodeId }),
+      });
+      if (res.ok) {
+        fetchData();
+      }
+    } catch {}
+  };
+
   if (loading) {
     return (
       <AppLayout currentProfile={profile}>
@@ -135,7 +149,13 @@ export default function AnimeDetailPage() {
               {anime.description || 'No description provided.'}
             </p>
 
-            <div className="pt-4 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-text-muted">
+              <span className="px-2.5 py-1 rounded-lg bg-surface-elevated border border-border/50 text-white font-mono">
+                {episodes.length} {episodes.length === 1 ? 'Episode' : 'Episodes'} Available
+              </span>
+            </div>
+
+            <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
                 onClick={toggleWatchlist}
                 className={`px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
@@ -198,13 +218,23 @@ export default function AnimeDetailPage() {
                   </div>
                 </div>
 
-                <Link
-                  href={`/watch/${ep.id}`}
-                  className="purple-glow-btn px-4 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 shrink-0"
-                >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Watch</span>
-                </Link>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    href={`/watch/${ep.id}`}
+                    className="purple-glow-btn px-4 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Watch</span>
+                  </Link>
+
+                  <button
+                    onClick={() => handleDeleteEpisode(ep.id, ep.title)}
+                    className="p-2 text-text-secondary hover:text-status-error rounded-xl hover:bg-surface-elevated transition-colors"
+                    title="Delete Episode"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             ))}
 

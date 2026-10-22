@@ -46,22 +46,13 @@ export async function getStorageLedger(profileId?: string): Promise<StorageSumma
     total_series: allAnime.length,
     warning_level,
     assets,
-    recent_activity: [
-      {
-        id: 'act-1',
-        type: 'upload',
-        description: 'Uploaded Solo Leveling S01E03 (1.45 GB)',
-        timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-        size_bytes: 1450000000,
-      },
-      {
-        id: 'act-2',
-        type: 'upload',
-        description: 'Uploaded Dan Da Dan S01E05 (1.25 GB)',
-        timestamp: new Date(Date.now() - 1000 * 60 * 360).toISOString(),
-        size_bytes: 1250000000,
-      },
-    ],
+    recent_activity: assets.slice(0, 5).map((a) => ({
+      id: a.id,
+      type: 'upload',
+      description: `Uploaded ${a.original_filename} (${formatBytes(a.actual_size_bytes)})`,
+      timestamp: a.created_at,
+      size_bytes: a.actual_size_bytes,
+    })),
   };
 }
 

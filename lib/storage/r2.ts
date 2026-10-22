@@ -6,6 +6,8 @@ import {
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import fs from 'fs';
+import path from 'path';
 
 const accountId = process.env.R2_ACCOUNT_ID;
 const accessKeyId = process.env.R2_ACCESS_KEY_ID;
@@ -110,9 +112,25 @@ export class R2StorageService {
   }
 
   /**
-   * Deletes an object from R2.
+   * Deletes an object from R2 and local disk storage.
    */
   async deleteObject(objectKey: string): Promise<boolean> {
+    try {
+      const cleanKey = objectKey.replace(/\.\./g, '');
+      const localPaths = [
+        path.join(process.cwd(), '.data', 'uploads', cleanKey),
+        path.join(process.cwd(), '.data', 'uploads', path.basename(cleanKey)),
+      ];
+      for (const p of localPaths) {
+        if (fs.existsSync(p)) {
+          fs.unlinkSync(p);
+          try {
+            fs.rmdirSync(path.dirname(p));
+          } catch {}
+        }
+      }
+    } catch {}
+
     if (s3Client && isR2Configured) {
       try {
         const command = new DeleteObjectCommand({

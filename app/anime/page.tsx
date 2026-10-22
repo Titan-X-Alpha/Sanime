@@ -145,7 +145,7 @@ export default function AnimeCatalogPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent" />
                 <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-semibold text-accent-light border border-border/40">
-                  {anime.total_episodes || 12} EPS
+                  {anime.total_episodes ?? 0} EPS
                 </span>
               </div>
 

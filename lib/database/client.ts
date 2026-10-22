@@ -31,6 +31,7 @@ interface LocalStoreData {
 class LocalStore {
   private filePath: string;
   private data: LocalStoreData;
+  private lastMtime: number = 0;
 
   constructor() {
     this.filePath = path.join(process.cwd(), '.data', 'sanime_store.json');
@@ -40,6 +41,8 @@ class LocalStore {
   private loadOrSeed(): LocalStoreData {
     try {
       if (fs.existsSync(this.filePath)) {
+        const stats = fs.statSync(this.filePath);
+        this.lastMtime = stats.mtimeMs;
         const raw = fs.readFileSync(this.filePath, 'utf-8');
         return JSON.parse(raw);
       }
@@ -73,7 +76,7 @@ class LocalStore {
           poster_url: '/images/hero-banner.jpg',
           banner_url: '/images/hero-banner.jpg',
           genre: ['Action', 'Fantasy', 'Supernatural'],
-          total_episodes: 12,
+          total_episodes: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -84,7 +87,7 @@ class LocalStore {
           poster_url: '/images/dandadan.jpg',
           banner_url: '/images/dandadan.jpg',
           genre: ['Action', 'Comedy', 'Supernatural'],
-          total_episodes: 12,
+          total_episodes: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -95,7 +98,7 @@ class LocalStore {
           poster_url: '/images/tanjiro.jpg',
           banner_url: '/images/hero-banner.jpg',
           genre: ['Action', 'Historical', 'Supernatural'],
-          total_episodes: 26,
+          total_episodes: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -106,7 +109,7 @@ class LocalStore {
           poster_url: '/images/gojo.jpg',
           banner_url: '/images/hero-banner.jpg',
           genre: ['Action', 'Dark Fantasy', 'Supernatural'],
-          total_episodes: 24,
+          total_episodes: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -117,7 +120,7 @@ class LocalStore {
           poster_url: '/images/posters-grid.jpg',
           banner_url: '/images/hero-banner.jpg',
           genre: ['Action', 'Adventure', 'Fantasy'],
-          total_episodes: 1080,
+          total_episodes: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -128,7 +131,7 @@ class LocalStore {
           poster_url: '/images/naruto.jpg',
           banner_url: '/images/naruto.jpg',
           genre: ['Action', 'Adventure', 'Martial Arts', 'Shounen'],
-          total_episodes: 220,
+          total_episodes: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -139,131 +142,15 @@ class LocalStore {
           poster_url: '/images/naruto-shippuden.jpg',
           banner_url: '/images/naruto-shippuden.jpg',
           genre: ['Action', 'Adventure', 'Fantasy', 'Martial Arts'],
-          total_episodes: 500,
+          total_episodes: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
       ],
-      episodes: [
-        {
-          id: 'ep-solo-1',
-          anime_id: soloId,
-          season_number: 1,
-          episode_number: 1,
-          title: "I'm Used to It",
-          duration_seconds: 1420,
-          thumbnail_url: '/images/hero-banner.jpg',
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: 'ep-solo-2',
-          anime_id: soloId,
-          season_number: 1,
-          episode_number: 2,
-          title: "If I Had One More Chance",
-          duration_seconds: 1420,
-          thumbnail_url: '/images/hero-banner.jpg',
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: 'ep-solo-3',
-          anime_id: soloId,
-          season_number: 1,
-          episode_number: 3,
-          title: "It's Like a Game",
-          duration_seconds: 1420, // 23:40
-          thumbnail_url: '/images/hero-banner.jpg',
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: 'ep-dan-5',
-          anime_id: dandadanId,
-          season_number: 1,
-          episode_number: 5,
-          title: "Like, This is Love?!",
-          duration_seconds: 1450, // 24:10
-          thumbnail_url: '/images/dandadan.jpg',
-          created_at: new Date().toISOString(),
-        },
-      ],
-      media_assets: [
-        {
-          id: 'asset-solo-3',
-          episode_id: 'ep-solo-3',
-          object_key: `media/${defaultProfileId}/solo-ep3/original.mp4`,
-          original_filename: 'Solo_Leveling_S01E03_1080p.mp4',
-          mime_type: 'video/mp4',
-          actual_size_bytes: 1450000000, // ~1.45 GB
-          upload_status: 'completed',
-          media_format: 'mp4',
-          created_at: new Date().toISOString(),
-          verified_at: new Date().toISOString(),
-          video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', // sample working video for instant playback test
-        },
-        {
-          id: 'asset-dan-5',
-          episode_id: 'ep-dan-5',
-          object_key: `media/${defaultProfileId}/dan-ep5/original.mp4`,
-          original_filename: 'DanDaDan_S01E05_1080p.mp4',
-          mime_type: 'video/mp4',
-          actual_size_bytes: 1250000000, // ~1.25 GB
-          upload_status: 'completed',
-          media_format: 'mp4',
-          created_at: new Date().toISOString(),
-          verified_at: new Date().toISOString(),
-          video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-        },
-        {
-          id: 'asset-dummy-1',
-          episode_id: 'ep-solo-1',
-          object_key: `media/${defaultProfileId}/solo-ep1/original.mp4`,
-          original_filename: 'Solo_Leveling_S01E01.mp4',
-          mime_type: 'video/mp4',
-          actual_size_bytes: 1850000000,
-          upload_status: 'completed',
-          media_format: 'mp4',
-          created_at: new Date().toISOString(),
-          verified_at: new Date().toISOString(),
-        },
-        {
-          id: 'asset-dummy-2',
-          episode_id: 'ep-solo-2',
-          object_key: `media/${defaultProfileId}/solo-ep2/original.mp4`,
-          original_filename: 'Solo_Leveling_S01E02.mp4',
-          mime_type: 'video/mp4',
-          actual_size_bytes: 1850000000,
-          upload_status: 'completed',
-          media_format: 'mp4',
-          created_at: new Date().toISOString(),
-          verified_at: new Date().toISOString(),
-        },
-      ],
-      watch_progress: [
-        {
-          id: 'prog-solo-3',
-          profile_id: defaultProfileId,
-          episode_id: 'ep-solo-3',
-          position_seconds: 754, // 12:34
-          duration_seconds: 1420, // 23:40
-          is_completed: false,
-          last_watched_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-        },
-        {
-          id: 'prog-dan-5',
-          profile_id: defaultProfileId,
-          episode_id: 'ep-dan-5',
-          position_seconds: 1100, // 18:20
-          duration_seconds: 1450, // 24:10
-          is_completed: false,
-          last_watched_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-        },
-      ],
-      watchlist: [
-        { profile_id: defaultProfileId, anime_id: soloId, created_at: new Date().toISOString() },
-        { profile_id: defaultProfileId, anime_id: dandadanId, created_at: new Date().toISOString() },
-        { profile_id: defaultProfileId, anime_id: demonSlayerId, created_at: new Date().toISOString() },
-        { profile_id: defaultProfileId, anime_id: jjkId, created_at: new Date().toISOString() },
-      ],
+      episodes: [],
+      media_assets: [],
+      watch_progress: [],
+      watchlist: [],
       player_preferences: [
         {
           profile_id: defaultProfileId,
@@ -290,12 +177,23 @@ class LocalStore {
         fs.mkdirSync(dir, { recursive: true });
       }
       fs.writeFileSync(this.filePath, JSON.stringify(data, null, 2), 'utf-8');
+      const stats = fs.statSync(this.filePath);
+      this.lastMtime = stats.mtimeMs;
     } catch {
       // In-memory mode if write fails
     }
   }
 
   public getRaw(): LocalStoreData {
+    try {
+      if (fs.existsSync(this.filePath)) {
+        const stats = fs.statSync(this.filePath);
+        if (stats.mtimeMs > this.lastMtime) {
+          this.data = JSON.parse(fs.readFileSync(this.filePath, 'utf-8'));
+          this.lastMtime = stats.mtimeMs;
+        }
+      }
+    } catch {}
     return this.data;
   }
 
@@ -388,7 +286,12 @@ export class DatabaseClient {
       return data || [];
     }
 
-    let list = [...localStore.getRaw().anime];
+    const store = localStore.getRaw();
+    let list = store.anime.map((a) => ({
+      ...a,
+      total_episodes: store.episodes.filter((e) => e.anime_id === a.id).length,
+    }));
+
     if (search) {
       const q = search.toLowerCase();
       list = list.filter((a) => a.title.toLowerCase().includes(q) || a.description.toLowerCase().includes(q));
@@ -401,7 +304,13 @@ export class DatabaseClient {
       const { data } = await this.supabase.from('anime').select('*').eq('id', id).single();
       return data || null;
     }
-    return localStore.getRaw().anime.find((a) => a.id === id) || null;
+    const store = localStore.getRaw();
+    const found = store.anime.find((a) => a.id === id);
+    if (!found) return null;
+    return {
+      ...found,
+      total_episodes: store.episodes.filter((e) => e.anime_id === found.id).length,
+    };
   }
 
   async createAnime(anime: Omit<Anime, 'id' | 'created_at' | 'updated_at'>): Promise<Anime> {
@@ -518,12 +427,36 @@ export class DatabaseClient {
     return localStore.getRaw().media_assets.find((m) => m.episode_id === episodeId) || null;
   }
 
+  async deleteEpisode(id: string): Promise<void> {
+    if (this.supabase) {
+      await this.supabase.from('watch_progress').delete().eq('episode_id', id);
+      await this.supabase.from('media_assets').delete().eq('episode_id', id);
+      await this.supabase.from('episodes').delete().eq('id', id);
+      return;
+    }
+    const store = localStore.getRaw();
+    store.watch_progress = store.watch_progress.filter((p) => p.episode_id !== id);
+    store.media_assets = store.media_assets.filter((m) => m.episode_id !== id);
+    store.episodes = store.episodes.filter((e) => e.id !== id);
+    localStore.save();
+  }
+
   async deleteMediaAsset(id: string): Promise<void> {
     if (this.supabase) {
+      const { data: asset } = await this.supabase.from('media_assets').select('*').eq('id', id).single();
+      if (asset?.episode_id) {
+        await this.supabase.from('watch_progress').delete().eq('episode_id', asset.episode_id);
+        await this.supabase.from('episodes').delete().eq('id', asset.episode_id);
+      }
       await this.supabase.from('media_assets').delete().eq('id', id);
       return;
     }
     const store = localStore.getRaw();
+    const asset = store.media_assets.find((m) => m.id === id);
+    if (asset && asset.episode_id) {
+      store.watch_progress = store.watch_progress.filter((p) => p.episode_id !== asset.episode_id);
+      store.episodes = store.episodes.filter((e) => e.id !== asset.episode_id);
+    }
     store.media_assets = store.media_assets.filter((m) => m.id !== id);
     localStore.save();
   }
@@ -609,7 +542,7 @@ export class DatabaseClient {
 
     const store = localStore.getRaw();
     const progressList = store.watch_progress
-      .filter((p) => p.profile_id === profileId && !p.is_completed)
+      .filter((p) => p.profile_id === profileId && !p.is_completed && store.episodes.some((e) => e.id === p.episode_id))
       .sort((a, b) => new Date(b.last_watched_at).getTime() - new Date(a.last_watched_at).getTime())
       .slice(0, limit);
 
