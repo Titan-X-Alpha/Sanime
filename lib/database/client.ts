@@ -121,6 +121,28 @@ class LocalStore {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
+        {
+          id: '66666666-6666-6666-6666-666666666666',
+          title: 'Naruto',
+          description: 'Moments prior to Naruto Uzumaki\'s birth, a huge demon known as the Kyuubi, the Nine-Tailed Fox, attacked Konohagakure. Naruto grows up as an outcast orphan who dreams of becoming the village leader, the Hokage.',
+          poster_url: '/images/naruto.jpg',
+          banner_url: '/images/naruto.jpg',
+          genre: ['Action', 'Adventure', 'Martial Arts', 'Shounen'],
+          total_episodes: 220,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: '77777777-7777-7777-7777-777777777777',
+          title: 'Naruto Shippuden',
+          description: 'After two and a half years of training with Jiraiya, Naruto Uzumaki returns to Konohagakure with newfound strength. Now older and more determined, he faces the impending threat of the Akatsuki organization.',
+          poster_url: '/images/naruto-shippuden.jpg',
+          banner_url: '/images/naruto-shippuden.jpg',
+          genre: ['Action', 'Adventure', 'Fantasy', 'Martial Arts'],
+          total_episodes: 500,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
       ],
       episodes: [
         {
