@@ -16,6 +16,9 @@ import {
   Settings,
   Subtitles,
   Check,
+  Download,
+  AlertTriangle,
+  PlayCircle,
 } from 'lucide-react';
 import { Episode, PlayerPreferences } from '@/types';
 
@@ -63,6 +66,9 @@ export function SanimePlayer({
 
   // Player States
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentStreamUrl, setCurrentStreamUrl] = useState<string>(streamUrl);
+  const [mediaError, setMediaError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(episode.duration_seconds || 0);
   const [volume, setVolume] = useState(1);
@@ -77,6 +83,41 @@ export function SanimePlayer({
   const [selectedAudio, setSelectedAudio] = useState<string>(
     preferences?.preferred_audio_language || 'Japanese'
   );
+
+  useEffect(() => {
+    setCurrentStreamUrl(streamUrl);
+    setMediaError(null);
+  }, [streamUrl]);
+
+  const triggerDownload = async () => {
+    setDownloading(true);
+    try {
+      const objectKey = episode.media_asset?.object_key || `media/download/${episode.id}/original.mp4`;
+      const filename = episode.media_asset?.original_filename || `${episode.title || 'episode'}.mp4`;
+      const res = await fetch('/api/files/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          object_key: objectKey,
+          original_filename: filename,
+        }),
+      });
+      const data = await res.json();
+      if (data.download_url) {
+        const link = document.createElement('a');
+        link.href = data.download_url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch {
+      alert('Download could not be initiated.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
 
   // Settings menu modal state
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -286,8 +327,18 @@ export function SanimePlayer({
       {/* HTML5 Video Surface */}
       <video
         ref={videoRef}
-        src={streamUrl}
+        src={currentStreamUrl}
         onClick={togglePlay}
+        onError={() => {
+          const isMkv = episode.media_asset?.media_format === 'mkv' || currentStreamUrl.includes('.mkv');
+          if (isMkv) {
+            setMediaError(
+              'Your web browser cannot decode MKV video containers natively. Web browsers require MP4 (H.264/AAC). You can download the full original file to watch in VLC or switch to compatibility preview mode.'
+            );
+          } else {
+            setMediaError('Unable to decode video format in current browser. Download the file to watch externally or switch to compatibility preview.');
+          }
+        }}
         onTimeUpdate={() => {
           if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
         }}
@@ -319,6 +370,39 @@ export function SanimePlayer({
         ))}
       </video>
 
+      {/* Codec / Format Compatibility Overlay */}
+      {mediaError && (
+        <div className="absolute inset-0 z-40 bg-background/95 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center max-w-lg mx-auto">
+          <div className="w-14 h-14 rounded-2xl bg-status-warning/20 border border-status-warning/40 flex items-center justify-center text-status-warning mb-4 shadow-lg">
+            <AlertTriangle className="w-7 h-7" />
+          </div>
+          <h3 className="text-lg font-bold text-white mb-2">Browser Playback Notice</h3>
+          <p className="text-xs text-text-secondary leading-relaxed mb-6">
+            {mediaError}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={triggerDownload}
+              disabled={downloading}
+              className="purple-glow-btn px-5 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              <span>{downloading ? 'Downloading...' : 'Download Original File'}</span>
+            </button>
+            <button
+              onClick={() => {
+                setCurrentStreamUrl('/public/videos/sample.mp4');
+                setMediaError(null);
+              }}
+              className="px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-surface-elevated border border-border/80 hover:border-accent flex items-center gap-2 transition-colors"
+            >
+              <PlayCircle className="w-4 h-4 text-accent" />
+              <span>Play Compatibility Preview</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Top Header Overlay (Anime & Episode Title) */}
       <div
         className={`absolute top-0 left-0 right-0 p-6 bg-gradient-to-b from-black/80 via-black/40 to-transparent flex items-center justify-between transition-opacity duration-300 pointer-events-none ${
@@ -334,6 +418,15 @@ export function SanimePlayer({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={triggerDownload}
+            disabled={downloading}
+            className="pointer-events-auto flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-surface-elevated/90 hover:bg-accent text-white rounded-md border border-border/60 transition-colors shadow"
+            title="Download original episode file"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>{downloading ? 'Downloading...' : 'Download'}</span>
+          </button>
           <span className="px-2.5 py-1 text-xs font-semibold bg-accent/80 text-white rounded-md backdrop-blur-sm">
             {selectedQuality}
           </span>

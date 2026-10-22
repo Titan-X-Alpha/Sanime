@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SanimePlayer } from '@/components/player/SanimePlayer';
 import { Profile, Episode, PlayerPreferences } from '@/types';
-import { ArrowLeft, Play, SkipForward, Clock } from 'lucide-react';
+import { ArrowLeft, Play, SkipForward, Clock, Download } from 'lucide-react';
 
 export default function WatchEpisodePage() {
   const params = useParams();
@@ -121,7 +121,39 @@ export default function WatchEpisodePage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-mono text-text-muted">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-text-muted">
+            <button
+              onClick={async () => {
+                try {
+                  const objectKey = episode.media_asset?.object_key || `media/download/${episode.id}/original.mp4`;
+                  const filename = episode.media_asset?.original_filename || `${episode.title || 'episode'}.mp4`;
+                  const res = await fetch('/api/files/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      object_key: objectKey,
+                      original_filename: filename,
+                    }),
+                  });
+                  const data = await res.json();
+                  if (data.download_url) {
+                    const link = document.createElement('a');
+                    link.href = data.download_url;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }
+                } catch {
+                  alert('Download failed.');
+                }
+              }}
+              className="px-4 py-2 rounded-xl bg-surface-elevated hover:bg-accent border border-border/70 text-xs font-semibold text-white flex items-center gap-2 transition-colors shadow"
+              title="Download original episode file"
+            >
+              <Download className="w-3.5 h-3.5 text-accent-light" />
+              <span>Download Episode</span>
+            </button>
             <span className="flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-accent" />
               <span>{Math.floor((episode.duration_seconds || 1420) / 60)} minutes</span>

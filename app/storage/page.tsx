@@ -64,9 +64,16 @@ export default function StoragePage() {
       });
       const data = await res.json();
       if (data.download_url) {
-        window.open(data.download_url, '_blank');
+        const link = document.createElement('a');
+        link.href = data.download_url;
+        link.download = asset.original_filename || 'episode.mp4';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
-    } catch {}
+    } catch (err) {
+      alert('Could not start download. Please verify your session.');
+    }
   };
 
   const handleDelete = async (asset: MediaAsset) => {

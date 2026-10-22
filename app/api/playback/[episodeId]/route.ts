@@ -16,12 +16,13 @@ export async function GET(
     }
 
     const mediaAsset = episode.media_asset;
-    let streamUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    let streamUrl = '/api/storage/mock-media';
 
     if (mediaAsset?.video_url) {
       streamUrl = mediaAsset.video_url;
     } else if (mediaAsset?.object_key) {
-      streamUrl = await r2Storage.createPresignedDownloadUrl(mediaAsset.object_key, mediaAsset.original_filename);
+      // Inline streaming without attachment disposition
+      streamUrl = await r2Storage.createPresignedDownloadUrl(mediaAsset.object_key);
     }
 
     // Get watch progress for this profile

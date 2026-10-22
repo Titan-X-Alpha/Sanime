@@ -70,7 +70,12 @@ export class R2StorageService {
       return await getSignedUrl(s3Client, command, { expiresIn: expiresInSeconds });
     }
 
-    // Fallback: If mock or seeded asset has video_url, we serve it or simulated playback url
+    // Fallback: If downloading (filename provided), route to mock-download
+    if (originalFilename) {
+      return `/api/storage/mock-download?key=${encodeURIComponent(objectKey)}&filename=${encodeURIComponent(originalFilename)}`;
+    }
+
+    // Streaming fallback
     return `/api/storage/mock-media?key=${encodeURIComponent(objectKey)}`;
   }
 
